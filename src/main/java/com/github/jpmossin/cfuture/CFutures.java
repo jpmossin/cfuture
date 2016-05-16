@@ -1,4 +1,4 @@
-package com.github.jpmossin;
+package com.github.jpmossin.cfuture;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -12,7 +12,8 @@ public class CFutures {
 
     public static <T> CFuture<T> from(Callable<T> futureCode, ExecutorService executor) {
         CFutureImpl<T> future = new CFutureImpl<>(executor);
-        future.setCodeToRun(futureCode);
+        DoneNotificationTask<T> task = new DoneNotificationTask<>(futureCode, future);
+        executor.submit(task);
         return future;
     }
 
