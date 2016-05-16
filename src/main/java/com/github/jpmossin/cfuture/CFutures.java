@@ -6,6 +6,16 @@ import java.util.concurrent.ForkJoinPool;
 
 public class CFutures {
 
+    public static <T> CFuture<T> resolved(T value) {
+        return resolved(value, ForkJoinPool.commonPool());
+    }
+
+    public static <T> CFuture<T> resolved(T value, ExecutorService executor) {
+        CFutureImpl<T> future = new CFutureImpl<>(executor);
+        future.completeSuccessfully(value);
+        return future;
+    }
+
     public static <T> CFuture<T> from(Callable<T> futureCode) {
         return from(futureCode, ForkJoinPool.commonPool());
     }
