@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A dummy executor that can run a Runnable synchronously.
+ */
 public class SynchronousExecutor implements ExecutorService {
 
     public int numberOfSubmits = 0;
