@@ -1,0 +1,1 @@
+A simple composable future implementation for Java.
