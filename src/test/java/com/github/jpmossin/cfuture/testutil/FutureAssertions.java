@@ -6,14 +6,13 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class FutureAssertions {
 
-    public static <T> void assertFutureResolvedSuccessfully(CFuture<T> future, String expectedValue) throws InterruptedException {
+    public static <T> void assertFutureResolvedSuccessfully(CFuture<T> future, T expectedValue) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<AssertionError> assertionErrorRef = new AtomicReference<>();
         future.forEach(res -> {

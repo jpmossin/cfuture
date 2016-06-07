@@ -49,7 +49,7 @@ final class CFutureImpl<T> implements CFuture<T> {
 
     @Override
     public <R> CFuture<R> map(Function<? super T, ? extends R> mapper, ExecutorService executor) {
-        return createDerivedFuture(mapper, CFutureImpl::completeSuccessfully, executor);
+        return createDerivedFuture(mapper,  CFutureImpl::completeSuccessfully, executor);
     }
 
     @Override
@@ -79,7 +79,7 @@ final class CFutureImpl<T> implements CFuture<T> {
             if (!failed) {
                 successCompleter.accept(resultFuture, mappedValue);
             }
-        });
+        }, executor);
         onFailure(resultFuture::completeWithError);
         return resultFuture;
     }
