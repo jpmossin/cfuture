@@ -13,7 +13,6 @@ public class SynchronousExecutor implements ExecutorService {
     public int numberOfSubmits = 0;
 
     public Future<?> submit(Runnable task) {
-        System.out.println("task: " + task);
         task.run();
         numberOfSubmits += 1;
         return CompletableFuture.completedFuture(null);

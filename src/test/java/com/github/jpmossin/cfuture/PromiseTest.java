@@ -2,8 +2,6 @@ package com.github.jpmossin.cfuture;
 
 import org.junit.Test;
 
-import javax.management.RuntimeErrorException;
-
 import static com.github.jpmossin.cfuture.testutil.FutureAssertions.assertFutureFailedWithError;
 import static com.github.jpmossin.cfuture.testutil.FutureAssertions.assertFutureResolvedSuccessfully;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -22,7 +20,7 @@ public class PromiseTest {
     public void createPromiseAndResolveWithFailure() throws Exception {
         Promise<String> p = CFutures.promise();
         p.failure(new RuntimeException(":("));
-        assertFutureFailedWithError(p.future(), RuntimeErrorException.class);
+        assertFutureFailedWithError(p.future(), RuntimeException.class);
     }
 
     @Test

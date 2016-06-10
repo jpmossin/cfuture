@@ -12,11 +12,12 @@ final class CFutureImpl<T> implements CFuture<T> {
 
     private final ExecutorService executor;
 
+    // on successfull resolution, successResult will hold the result and errorResult will be null, and vice versa on failure.
     private final AtomicReference<T> successResult = new AtomicReference<>();
     private final AtomicReference<Throwable> errorResult = new AtomicReference<>();
 
-    private Set<OnDoneSubscription<T>> onSuccessSubscriptions = new CopyOnWriteArraySet<>();
-    private Set<OnDoneSubscription<Throwable>> onFailureSubscriptions = new CopyOnWriteArraySet<>();
+    private final Set<OnDoneSubscription<T>> onSuccessSubscriptions = new CopyOnWriteArraySet<>();
+    private final Set<OnDoneSubscription<Throwable>> onFailureSubscriptions = new CopyOnWriteArraySet<>();
 
 
     CFutureImpl(ExecutorService executor) {
@@ -36,9 +37,9 @@ final class CFutureImpl<T> implements CFuture<T> {
         synchronized (this) {
             resultHolder.set(result);
             subscriptionsSnapshot = subscriptions.iterator();
-            onSuccessSubscriptions = null;
-            onFailureSubscriptions = null;
         }
+        onSuccessSubscriptions.clear(); // clear to avoid holding on to old subscription references
+        onFailureSubscriptions.clear();
         callSubscriptionHandlers(subscriptionsSnapshot, result);
     }
 
@@ -66,7 +67,7 @@ final class CFutureImpl<T> implements CFuture<T> {
     }
 
     private <R, V> CFuture<R> createDerivedFuture(Function<? super T, V> mapper, BiConsumer<CFutureImpl<R>, V> successCompleter, ExecutorService executor) {
-        CFutureImpl<R> resultFuture = new CFutureImpl<>(executor);
+        CFutureImpl<R> derivedFuture = new CFutureImpl<>(executor);
         forEach(res -> {
             V mappedValue = null;
             boolean failed = false;
@@ -74,14 +75,14 @@ final class CFutureImpl<T> implements CFuture<T> {
                 mappedValue = mapper.apply(res);
             } catch (Exception e) {
                 failed = true;
-                resultFuture.completeWithError(e);
+                derivedFuture.completeWithError(e);
             }
             if (!failed) {
-                successCompleter.accept(resultFuture, mappedValue);
+                successCompleter.accept(derivedFuture, mappedValue);
             }
         }, executor);
-        onFailure(resultFuture::completeWithError);
-        return resultFuture;
+        onFailure(derivedFuture::completeWithError);  // if this future fails then we fail the derived future with the same throwable
+        return derivedFuture;
     }
 
 
@@ -115,11 +116,11 @@ final class CFutureImpl<T> implements CFuture<T> {
         saveOrInvokeSubscription(subscription, errorResult, onFailureSubscriptions);
     }
 
-    private <R> void saveOrInvokeSubscription(OnDoneSubscription<R> subscription, AtomicReference<R> valueHolder, Set<OnDoneSubscription<R>> savedSubscriptions) {
+    private <R> void saveOrInvokeSubscription(OnDoneSubscription<R> subscription, AtomicReference<R> resultHolder, Set<OnDoneSubscription<R>> savedSubscriptions) {
         R callBackValue;
         synchronized (this) {
-            callBackValue = valueHolder.get();
-            if (callBackValue == null && savedSubscriptions != null) {
+            callBackValue = resultHolder.get();
+            if (callBackValue == null) {
                 savedSubscriptions.add(subscription);
             }
         }

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class FutureAssertions {
 
@@ -44,7 +45,10 @@ public class FutureAssertions {
     }
 
     private static void checkAssertionResult(AssertionError assertionError, CountDownLatch latch) throws InterruptedException {
-        latch.await(1, TimeUnit.SECONDS);
+        boolean timedOut = !latch.await(1, TimeUnit.SECONDS);
+        if (timedOut) {
+            fail("timed out waiting for assertion code to finish");
+        }
         if (assertionError != null) {
             throw assertionError;
         }
