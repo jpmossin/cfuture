@@ -1,8 +1,8 @@
 A simple composable future implementation for Java.
 
 A future can be created either directly by specifying the code to run, or
-through a promise. For each operation you can specify the exector to run on
-(and if no exector is specified, ForkJoinPool.commonPool() is used by default)
+through a promise. For each operation you can specify the executor to run on
+(and if no executor is specified, ForkJoinPool.commonPool() is used by default)
 
 
 ```java
