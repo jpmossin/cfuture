@@ -35,6 +35,9 @@ final class CFutureImpl<T> implements CFuture<T> {
     private <V> void complete(V result, AtomicReference<V> resultHolder, Set<OnDoneSubscription<V>> subscriptions) {
         Iterator<OnDoneSubscription<V>> subscriptionsSnapshot;
         synchronized (this) {
+            if (completed()) {
+                return;
+            }
             resultHolder.set(result);
             subscriptionsSnapshot = subscriptions.iterator();
         }
@@ -139,6 +142,10 @@ final class CFutureImpl<T> implements CFuture<T> {
         ExecutorService executor = subscription.executor;
         Consumer<R> handler = subscription.subscriptionHandler;
         executor.submit(() -> handler.accept(result));
+    }
+
+    private synchronized boolean completed() {
+        return successResult.get() != null || errorResult.get() != null;
     }
 
 

@@ -32,4 +32,18 @@ public class PromiseTest {
         assertThat(syncExecutor.numberOfSubmits, equalTo(1));
     }
 
+    @Test
+    public void completingPromiseMultipleTimesIsAllowedButHasNoEffect() throws Exception {
+        Promise<Integer> p = CFutures.promise();
+        p.success(1);
+        p.success(2);
+        p.failure(new RuntimeException("foo"));
+        assertFutureResolvedSuccessfully(p.future(), 1);
+
+        p = CFutures.promise();
+        p.failure(new RuntimeException("fail"));
+        p.success(1);
+        assertFutureFailedWithError(p.future(), RuntimeException.class);
+    }
+
 }

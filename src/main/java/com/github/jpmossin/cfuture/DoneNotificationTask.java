@@ -21,11 +21,15 @@ final class DoneNotificationTask<V> extends FutureTask<V> {
             future.completeSuccessfully(get());
         }
         catch (ExecutionException | InterruptedException e) {
-            Throwable t = e;
-            if (e instanceof ExecutionException && e.getCause() != null) {
-                t = e.getCause();
-            }
-            future.completeWithError(t);
+            failFuture(e);
         }
+    }
+
+    private void failFuture(Exception e) {
+        Throwable t = e;
+        if (e instanceof ExecutionException && e.getCause() != null) {
+            t = e.getCause();
+        }
+        future.completeWithError(t);
     }
 }
